@@ -24,15 +24,14 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends  HookConsumerWidget{
-  MyHomePage({Key? key}) : super(key: key);
+  const MyHomePage({Key? key}) : super(key: key);
   
-  // String title = "hello world";
-
-  final TextEditingController controller = TextEditingController();
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-  final title = useState<String>('hello world');
+    
+  final TextEditingController controller = useTextEditingController();
+  final title = useState<String>('empty');
+  final todos = useState<List<String>>([]);
 
     return Scaffold(
       body: Center(
@@ -42,14 +41,26 @@ class MyHomePage extends  HookConsumerWidget{
               style: const TextStyle(fontSize: 10),
               controller: controller,
             ),
-            ElevatedButton(onPressed: (){
-              title.value = controller.value.text;
-            }, child: Text('aaaa'))
-,
+            ElevatedButton(
+              onPressed:(){
+                todos.value = [
+                  ...todos.value,
+                  controller.value.text
+                ];
+              },
+            child: const Text('add')
+            ),
              Text(
               title.value,
               // style: const TextStyle(fontSize: 10.0),
             ),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: todos.value.length,
+              itemBuilder: (context,index){
+                return Text(todos.value[index]);
+              },
+            )
           ],
         ),
       ),
