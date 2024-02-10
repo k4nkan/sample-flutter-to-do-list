@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,49 +18,64 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-class MyHomePage extends  HookConsumerWidget{
-  const MyHomePage({Key? key}) : super(key: key);
-  
+class MyHomePage extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    
-  final TextEditingController controller = useTextEditingController();
-  final title = useState<String>('empty');
-  final todos = useState<List<String>>([]);
-
+    final _controller = useTextEditingController();
+    final _text = useState<String>('');
+    final todos = useState<List<String>>([]);
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            TextField(
-              style: const TextStyle(fontSize: 10),
-              controller: controller,
-            ),
-            ElevatedButton(
-              onPressed:(){
-                todos.value = [
-                  ...todos.value,
-                  controller.value.text
-                ];
-              },
-            child: const Text('add')
-            ),
-             Text(
-              title.value,
-              // style: const TextStyle(fontSize: 10.0),
-            ),
-            ListView.builder(
+      appBar: AppBar(
+        title: Text('こんちくわ'),
+      ),
+      body: Column(
+        children: [
+          Text('Hello, world!'),
+          TextField(
+            controller: _controller,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              todos.value = [
+                ...todos.value,
+                _controller.value.text
+              ]; // 状態を更新してUIを再描画
+              _controller.clear(); // テキストフィールドをクリア
+            },
+            child: const Text('追加'),
+          ),
+          ListView.builder(
               shrinkWrap: true,
               itemCount: todos.value.length,
-              itemBuilder: (context,index){
-                return Text(todos.value[index]);
-              },
-            )
-          ],
-        ),
+              itemBuilder: (context, index) {
+                // return Text(todos.value[index]);
+                return Card(
+                  child: ListTile(
+                    title: Text(todos.value[index]),
+                  ),
+                );
+              })
+        ],
       ),
     );
   }
 }
 
+final todoListProvider = StateNotifierProvider<TodoListNotifier, List<String>>(
+  (ref) => TodoListNotifier(),
+);
+
+class TodoListNotifier extends StateNotifier<List<String>> {
+  TodoListNotifier(): super([]);
+
+  void add(String todo) {
+    state = [...state, todo];
+  }
+
+  void remove(String todo) {
+    state = [
+      for(final item in state)
+      if(item != todo) item,
+    ];
+  }
+}
